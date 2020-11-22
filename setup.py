@@ -18,6 +18,7 @@ setup(
 		- One ShellClient
 """,
     long_description = open('README.md').read(),
+    long_description_content_type = "text/markdown",
  
     include_package_data = True,
 
@@ -44,4 +45,5 @@ setup(
             'ReverseShellServer = AsyncRemoteShell:reverse_shell_server',
         ],
     },
+    python_requires='>=3.6',
 )
