@@ -35,26 +35,22 @@ With python 3 :
 from AsyncRemoteShell import ReverseShellClient
 import asyncore
 ReverseShellClient("10.0.0.2", 45678) # host and port is required
-asyncore.loop()
-```
+asyncore.loop()```
 - ```python
 from AsyncRemoteShell import ReverseShellServer
 import asyncore
 ReverseShellServer("", 45678) # interface and port is required
-asyncore.loop()
-```
+asyncore.loop()```
 - ```python
 from AsyncRemoteShell import ShellClient
 import asyncore
 ShellClient("10.0.0.2", 45678) # host and port is required
-asyncore.loop()
-```
+asyncore.loop()```
 - ```python
 from AsyncRemoteShell import ShellServer
 import asyncore
 ShellServer("", 45678) # interface and port is required
-asyncore.loop()
-```
+asyncore.loop()```
 
 ## Why Asynchronous Shell
 You can install this package on Windows and execute this script :
@@ -64,7 +60,8 @@ from os import system
 t1 = perf_counter(); system('powershell -c "Get-PSDrive" & netstat & systeminfo'); t2 = perf_counter()
 print(f"Execution time : {t2 - t1} s")
 ```
+
 After that launch this asynchronous shell, launch this command : ``` powershell -c "Get-PSDrive" & netstat & systeminfo ``` and compare the execution time.
 
 ## Link
-( AsyncRemoteShell Github Page )[ https://github.com/mauricelambert/Asynchronous-Remote-Shell ]
+[AsyncRemoteShell Github Page](https://github.com/mauricelambert/Asynchronous-Remote-Shell)
