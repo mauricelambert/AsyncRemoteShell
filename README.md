@@ -25,31 +25,35 @@ pip install AsyncRemoteShell
 
 ## Examples
 With System Terminal/System Console :
-- ``` ReverseShellClient --interface=127.0.0.1 --port=45678 ```
-- ``` ReverseShellServer -i=localhost -p=45678 ```
-- ``` ShellClient 10.0.0.2 56789 ```
+- ` ReverseShellClient --interface=127.0.0.1 --port=45678 `
+- ` ReverseShellServer -i=localhost -p=45678 `
+- ` ShellClient 10.0.0.2 56789 `
 - ` ShellServer --interface= -p=56789 `
 
 With python 3 :
-- ```python
+- ReverseShellClient : 
+```python
 from AsyncRemoteShell import ReverseShellClient
 import asyncore
 ReverseShellClient("10.0.0.2", 45678) # host and port is required
 asyncore.loop()
 ```
-- ```python
+- ReverseShellServer : 
+```python
 from AsyncRemoteShell import ReverseShellServer
 import asyncore
 ReverseShellServer("", 45678) # interface and port is required
 asyncore.loop()
 ```
-- ```python 
+- ShellClient : 
+```python 
 from AsyncRemoteShell import ShellClient
 import asyncore
 ShellClient("10.0.0.2", 45678) # host and port is required
 asyncore.loop()
 ```
-- ```python 
+- ShellServer : 
+```python 
 from AsyncRemoteShell import ShellServer
 import asyncore
 ShellServer("", 45678) # interface and port is required
@@ -65,7 +69,7 @@ t1 = perf_counter(); system('powershell -c "Get-PSDrive" & netstat & systeminfo'
 print(f"Execution time : {t2 - t1} s")
 ```
 
-After that launch this asynchronous shell, launch this command : ``` powershell -c "Get-PSDrive" & netstat & systeminfo ``` and compare the execution time.
+After that launch this asynchronous shell, launch this command : ` powershell -c "Get-PSDrive" & netstat & systeminfo ` and compare the execution time.
 
 ## Link
 [AsyncRemoteShell Github Page](https://github.com/mauricelambert/Asynchronous-Remote-Shell)
