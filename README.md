@@ -73,3 +73,6 @@ After that launch this asynchronous shell, launch this command : ` powershell -c
 
 ## Link
 [AsyncRemoteShell Github Page](https://github.com/mauricelambert/Asynchronous-Remote-Shell)
+
+## Licence
+Licensed under the [GPL, version 3](https://www.gnu.org/licenses/).
