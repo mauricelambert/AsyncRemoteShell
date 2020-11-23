@@ -27,7 +27,7 @@
 		- One ShellClient
 """
 
-__version__ = "0.0.1"
+__version__ = "0.0.3"
 
 __all__ = [
 	"ReverseShellServer", "ReverseShellClient", "ShellServer", "ShellClient", 
