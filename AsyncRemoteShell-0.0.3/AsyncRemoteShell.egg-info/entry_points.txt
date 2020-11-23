@@ -1,0 +1,6 @@
+[console_scripts]
+ReverseShellClient = AsyncRemoteShell:reverse_shell_client
+ReverseShellServer = AsyncRemoteShell:reverse_shell_server
+ShellClient = AsyncRemoteShell:shell_client
+ShellServer = AsyncRemoteShell:shell_server
+
