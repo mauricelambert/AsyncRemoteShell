@@ -1,13 +1,23 @@
 Metadata-Version: 2.1
 Name: AsyncRemoteShell
-Version: 0.0.3
-Description-Content-Type: text/markdown
+Version: 0.0.1
 Summary: 
-	This package implement 4 asynchronous tools to execute remote commands :
-		- One ReverseShellClient
-		- One ReverseShellServer
-		- One ShellServer
-		- One ShellClient
+	This package implement 4 asynchronous tools to execute remote commands
+
+Home-page: https://github.com/mauricelambert/AsyncRemoteShell
+Author: Maurice Lambert
+Author-email: mauricelambert434@gmail.com
+Description-Content-Type: text/markdown
+Platform: ALL
+Classifier: Programming Language :: Python
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3.8
+Requires-Python: >=3.6
+License: GPL3
 
 # AsyncRemoteShell
         
