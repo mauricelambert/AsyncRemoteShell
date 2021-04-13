@@ -1,12 +1,14 @@
 LICENSE.md
 MANIFEST.in
 README.md
+setup.cfg
 setup.py
 AsyncRemoteShell/ReverseShellClient.py
 AsyncRemoteShell/ReverseShellServer.py
 AsyncRemoteShell/ShellClient.py
 AsyncRemoteShell/ShellServer.py
 AsyncRemoteShell/__init__.py
+AsyncRemoteShell/__main__.py
 AsyncRemoteShell.egg-info/PKG-INFO
 AsyncRemoteShell.egg-info/SOURCES.txt
 AsyncRemoteShell.egg-info/dependency_links.txt

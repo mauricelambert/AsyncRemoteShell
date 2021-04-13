@@ -25,21 +25,23 @@
 
 import asynchat
 import asyncore
+import logging
 
 __all__ = ["ShellClient"]
 
 
 class ShellClient(asynchat.async_chat):
+
     """
-    This class is a client that allows you to send commands to the server.
+    This class implement a Shell Client.
     """
 
-    def __init__(self, host, port):
+    def __init__(self, host: str, port: int):
         asynchat.async_chat.__init__(self)
         self.create_socket()
         self.connect((host, port))
 
-        self.set_terminator(b"\r\x00\r\x00")
+        self.set_terminator(b"\x00")
         self.buffer = ""
         self.push(b"\n")
 
@@ -47,9 +49,11 @@ class ShellClient(asynchat.async_chat):
         self.buffer += data.decode()
 
     def found_terminator(self):
+
         """
-        This function ask you the command to send on the server.
+        Get the command and send it.
         """
+        
         command = input(self.buffer)
         while not command:
             command = input(self.buffer.split("\n")[-1])
@@ -57,26 +61,37 @@ class ShellClient(asynchat.async_chat):
         self.push(command.encode())
         self.buffer = ""
 
-        for c in command.split(" & "):
+        for c in command.split("&"):
             if c.startswith("exit"):
                 self.close_when_done()
 
 
 def main():
+
+    """
+    This function parse arguments and launch the ShellClient class.
+    """
+
     from sys import argv
+
+    logging.basicConfig(format='%(asctime)s %(levelname)s : %(message)s')
 
     if len(argv) != 3:
         print("USAGE : ShellClient <ip or hostname server> <port server : int>")
         exit(1)
 
-    try:
-        port = int(argv[2])
-    except ValueError:
-        print("USAGE : ShellClient <ip or hostname server> <port server>")
+    port = argv[2]
+    if port.isdigit():
+        port = int(port)
+    else:
+        print(
+            "USAGE : ShellClient <ip or hostname server> <port server : int>"
+            "\nPort must be an integer !"
+        )
         exit(1)
 
     ShellClient(argv[1], port)
-    print("ShellClient is running...\nPlease wait the server response...")
+    logging.warning("ShellClient is running...\nPlease wait the server response...")
     asyncore.loop()
 
 

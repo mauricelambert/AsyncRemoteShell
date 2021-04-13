@@ -38,11 +38,13 @@ from os import (
 from asyncio import create_subprocess_shell, run, gather
 from asyncio.subprocess import PIPE
 from time import perf_counter
+import logging
 
 __all__ = ["ShellServer"]
 
 
 class Shell(asynchat.async_chat):
+
     """
     This class get, parse and execute the command sent by the
     client and return the output to the client.
@@ -57,10 +59,12 @@ class Shell(asynchat.async_chat):
         self.buffer += data.decode()
 
     def found_terminator(self):
+        
         """
         This method parse the command, call the execution methods
         and and send the output to the client.
         """
+        
         if self.buffer:
             result = run(asynch(self.buffer))
             self.push("\n".join(result).encode())
@@ -73,9 +77,11 @@ class Shell(asynchat.async_chat):
         self.get_buffer_end()
 
     def get_first_buffer(self):
+
         """
-        This method send some informations in the first time.
+        This method send some informations to init connection.
         """
+        
         path_exec = "\n\t".join(get_exec_path())
         self.push(
             f"OS name : {os.name}\nThe number of processor : {cpu_count()}"
@@ -83,9 +89,11 @@ class Shell(asynchat.async_chat):
         )
 
     def get_buffer_end(self):
+
         """
         This method send the last line of the output to the client.
         """
+        
         if os.name == "nt":
             self.push(
                 f"\n{getlogin()}@{getenv('COMPUTERNAME')}-{getcwd()}>".encode()
@@ -94,10 +102,11 @@ class Shell(asynchat.async_chat):
             self.push(
                 f"\n{getlogin()}@{getenv('COMPUTERNAME')}:{getcwd()}$".encode()
             )
-        self.push("\r\x00\r\x00".encode())
+        self.push("\x00".encode())
 
 
 class ShellServer(asyncore.dispatcher):
+
     """
     The TCP server that created the socket and call the Shell class.
     """
@@ -109,21 +118,27 @@ class ShellServer(asyncore.dispatcher):
         self.listen(100)
 
     def handle_accept(self):
+
+        """This function accept the connection and launch Shell.
+        """
+
         pair = self.accept()
         if pair is not None:
             sock, addr = pair
-            print(f"{addr[0]}:{addr[1]} is connected...")
+            logging.warning(f"{addr[0]}:{addr[1]} is connected...")
             Shell(sock)
 
 
 async def special_command(commande):
+
     """
-    This method execute one command with "special" execution.
+    This method execute commands with "special" execution.
     The command "cd" and "exit" are implemented here.
     """
+    
     if commande.startswith("cd") or commande.startswith("chdir"):
         try:
-            chdir(" ".join(commande.split()[1:]))
+            chdir(commande.split(maxsplit=1)[1])
         except FileNotFoundError:
             return "Error with command : <cd>"
     elif commande.lower().startswith("exit"):
@@ -131,9 +146,11 @@ async def special_command(commande):
 
 
 async def exec_(commande):
+
     """
     This method execute one command and return the output.
     """
+    
     result = await special_command(commande)
     if result:
         return result
@@ -151,15 +168,19 @@ async def exec_(commande):
 
 
 async def asynch(commandes):
+
     """
     This method parse the command and call the execution method.
     She return a list of output.
     """
-    return await gather(*(exec_(commande) for commande in commandes.split(" & ")))
+    
+    return await gather(*(exec_(commande) for commande in commandes.split("&")))
 
 
 def main():
     from sys import argv
+
+    logging.basicConfig(format='%(asctime)s %(levelname)s : %(message)s')
 
     port = 45678
     host = ""
@@ -170,12 +191,12 @@ def main():
             host = arg.split("=")[1]
             argv_number += 1
         elif arg.startswith("--port=") or arg.startswith("-p="):
-            try:
-                port = int(arg.split("=")[1])
-            except ValueError:
-                print("ERROR : port must be an integer.")
-            else:
+            port = arg.split("=", 1)[1]
+            if port.isdigit():
+                port = int(port)
                 argv_number += 1
+            else:
+                logging.error("port must be an integer.")
 
     if len(argv) - argv_number > 1:
         print(
@@ -184,11 +205,11 @@ def main():
         )
 
     ShellServer(host, port)
-    print(f"Server is running on tcp://{host}:{port}")
+    logging.warning(f"Server is running on tcp://{host}:{port}")
     try:
         asyncore.loop()
     except KeyboardInterrupt:
-        print("Server is not running...")
+        logging.warning("Server is not running...")
 
 
 if __name__ == "__main__":
