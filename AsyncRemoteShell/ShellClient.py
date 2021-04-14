@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 ###################
 #    This package implement 4 asynchronous tools to execute remote commands
-#    Copyright (C) 2020  Maurice Lambert
+#    Copyright (C) 2020, 2021  Maurice Lambert
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,14 +20,20 @@
 ###################
 
 """
-    This module implement the ShellClient class.
+    This file implement a asynchronous ShellClient.
 """
 
+__all__ = ["ShellClient"]
+
+from time import sleep
 import asynchat
 import asyncore
 import logging
 
-__all__ = ["ShellClient"]
+try:
+    from .commons import parse_args
+except ImportError:
+    from commons import parse_args
 
 
 class ShellClient(asynchat.async_chat):
@@ -45,15 +51,24 @@ class ShellClient(asynchat.async_chat):
         self.buffer = ""
         self.push(b"\n")
 
-    def collect_incoming_data(self, data):
+    def collect_incoming_data(self, data: bytes) -> None:
+
+        """
+        Get shell output and exit if ShellServer send exit message.
+        """
+
         self.buffer += data.decode()
 
-    def found_terminator(self):
+        if "\nexit\n" in self.buffer or self.buffer.startswith("exit"):
+            logging.warning("Get exit message.")
+            self.close_when_done()
+
+    def found_terminator(self) -> None:
 
         """
-        Get the command and send it.
+        Print shell output, ask new command and send it.
         """
-        
+
         command = input(self.buffer)
         while not command:
             command = input(self.buffer.split("\n")[-1])
@@ -61,38 +76,30 @@ class ShellClient(asynchat.async_chat):
         self.push(command.encode())
         self.buffer = ""
 
-        for c in command.split("&"):
-            if c.startswith("exit"):
-                self.close_when_done()
-
 
 def main():
 
     """
-    This function parse arguments and launch the ShellClient class.
+    This function get arguments and launch ShellClient.
     """
 
-    from sys import argv
+    logging.basicConfig(format="%(asctime)s %(levelname)s : %(message)s")
 
-    logging.basicConfig(format='%(asctime)s %(levelname)s : %(message)s')
+    host, port = parse_args("ShellClient")
 
-    if len(argv) != 3:
-        print("USAGE : ShellClient <ip or hostname server> <port server : int>")
-        exit(1)
+    logging.warning("ShellClient is running...")
 
-    port = argv[2]
-    if port.isdigit():
-        port = int(port)
-    else:
-        print(
-            "USAGE : ShellClient <ip or hostname server> <port server : int>"
-            "\nPort must be an integer !"
-        )
-        exit(1)
+    while True:
+        try:
+            shell = ShellClient(host, port)
+            asyncore.loop()
+            sleep(10)
+        except KeyboardInterrupt:
+            shell.push(b"exit\n")
+            shell.close_when_done()
+            break
 
-    ShellClient(argv[1], port)
-    logging.warning("ShellClient is running...\nPlease wait the server response...")
-    asyncore.loop()
+    logging.warning("ShellClient is not running.")
 
 
 if __name__ == "__main__":

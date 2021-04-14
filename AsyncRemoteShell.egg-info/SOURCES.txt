@@ -1,4 +1,4 @@
-LICENSE.md
+LICENSE.txt
 MANIFEST.in
 README.md
 setup.cfg
@@ -9,6 +9,7 @@ AsyncRemoteShell/ShellClient.py
 AsyncRemoteShell/ShellServer.py
 AsyncRemoteShell/__init__.py
 AsyncRemoteShell/__main__.py
+AsyncRemoteShell/commons.py
 AsyncRemoteShell.egg-info/PKG-INFO
 AsyncRemoteShell.egg-info/SOURCES.txt
 AsyncRemoteShell.egg-info/dependency_links.txt

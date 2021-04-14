@@ -3,7 +3,7 @@
 
 ###################
 #    This package implement 4 asynchronous tools to execute remote commands
-#    Copyright (C) 2020  Maurice Lambert
+#    Copyright (C) 2020, 2021  Maurice Lambert
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by

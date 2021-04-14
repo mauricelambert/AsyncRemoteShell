@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 ###################
 #    This package implement 4 asynchronous tools to execute remote commands
-#    Copyright (C) 2020  Maurice Lambert
+#    Copyright (C) 2020, 2021  Maurice Lambert
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,93 +20,86 @@
 ###################
 
 """
-    This module implement a Asynchrone Reverse Shell Server.
+    This file implement a asynchronous ReverseShellServer.
 """
 
+__all__ = ["ReverseShellServer"]
+
+from typing import Tuple
 import asyncore
+import socket
 import logging
 
-__all__ = ["ReverseShellServer"]
+try:
+    from .commons import parse_args
+except ImportError:
+    from commons import parse_args
 
 
 class ReverseShell(asyncore.dispatcher_with_send):
 
     """
-    This class print informations send by the client and ask the 
-    command to the user.
+    This class implement a ReverseShell.
     """
 
-    def handle_read(self):
+    def handle_read(self) -> None:
 
         """
-        This method print informations send by the client and 
-        ask the command to the user.
+        This function retrieves data from a connected ReverseShellClient,
+        ask a new command and sends it.
         """
 
         data = self.recv(65535).decode()
-        command = input(data)
-        while not command:
-            command = input(data.split("\n")[-1])
-        self.send(command.encode())
+
+        if "exit" in data.split("\n"):
+            logging.warning("Client send exit message.")
+            self.close()
+        else:
+            command = input(data)
+            while not command:
+                command = input(data.split("\n")[-1])
+            self.send(command.encode())
 
 
 class ReverseShellServer(asyncore.dispatcher):
 
     """
-    This class implement a simple asynchronous TCP server.
+    This class implement a simple asynchronous TCP server to launch ReverseShell.
     """
 
-    def __init__(self, host, port):
+    def __init__(self, host: str, port: int):
         asyncore.dispatcher.__init__(self)
         self.create_socket()
         self.set_reuse_addr()
         self.bind((host, port))
         self.listen(100)
 
-    def handle_accepted(self, sock, addr):
+    def handle_accepted(self, sock: socket.socket, addr: Tuple[str, int]) -> None:
 
         """
-        This method call the ReverseShell class.
+        This method log a new connection and calls the ReverseShell class.
         """
 
         logging.warning(f"{addr[0]}:{addr[1]} is connected...")
         ReverseShell(sock)
 
 
-def main():
-    from sys import argv
+def main() -> None:
 
-    logging.basicConfig(format='%(asctime)s %(levelname)s : %(message)s')
+    """
+    This function get arguments and launch ReverseShellServer.
+    """
 
-    port = 45678
-    host = ""
-    argv_number = 0
+    logging.basicConfig(format="%(asctime)s %(levelname)s : %(message)s")
 
-    for arg in argv:
-        if arg.startswith("--interface=") or arg.startswith("-i="):
-            host = arg.split("=")[1]
-            argv_number += 1
-        elif arg.startswith("--port=") or arg.startswith("-p="):
-            port = arg.split("=", 1)[1]
-            if port.isdigit():
-                port = int(port)
-                argv_number += 1
-            else:
-                logging.error("port must be an integer.")
-                
-
-    if len(argv) - argv_number > 1:
-        print(
-            "USAGE : ReverseShellServer --interface=<interface name or adress,"
-            " default : ''> --port=<port number, default : 45678>"
-        )
+    host, port = parse_args("ShellServer")
 
     ReverseShellServer(host, port)
     logging.warning(f"Server is running on tcp://{host}:{port}")
     try:
         asyncore.loop()
     except KeyboardInterrupt:
-        logging.warning("Server is not running...")
+        logging.warning("Server is not running.")
 
 
 if __name__ == "__main__":
