@@ -9,7 +9,7 @@ This package implement 4 tools for asynchronous remote commands :
 
 ## Requirements
 This package require :
-- python 3
+- python3
 - python3 Standard Library
 
 ## Installation
@@ -34,42 +34,49 @@ ReverseShellServer -i=localhost -p=45678
 #### Shell
 
 ```bash
-ShellClient 10.0.0.2 56789 # arguments are required
+ShellClient
+ShellClient -i=10.0.0.2 --port=56789
 ShellServer
 ShellServer --interface= -p=56789
 ```
 
-### Python module commands
+### Python package commands
 
 ```bash
 python3 -m AsyncRemoteShell ShellServer
-python3 -m AsyncRemoteShell ShellClient localhost 45678
+python3 -m AsyncRemoteShell ShellClient
 
 python3 -m AsyncRemoteShell ShellServer -i=localhost -p=3456
-python3 -m AsyncRemoteShell ShellClient localhost 3456
+python3 -m AsyncRemoteShell ShellClient --interface=localhost --port=3456
 
-python3 -m AsyncRemoteShell.ShellServer -i=localhost -p=3456
-python3 -m AsyncRemoteShell.ShellClient localhost 3456
+python3 -m AsyncRemoteShell.ShellServer
+python3 -m AsyncRemoteShell.ShellClient
+
+python3 -m AsyncRemoteShell.ShellServer --interface=localhost --port=3456
+python3 -m AsyncRemoteShell.ShellClient -i=localhost -p=3456
 
 python3 -m AsyncRemoteShell ReverseShellServer
 python3 -m AsyncRemoteShell ReverseShellClient
 
 python3 -m AsyncRemoteShell ReverseShellServer -i=localhost -p=3456
-python3 -m AsyncRemoteShell ReverseShellClient -i=localhost -p=3456
+python3 -m AsyncRemoteShell ReverseShellClient --interface=localhost --port=3456
 
-python3 -m AsyncRemoteShell.ReverseShellServer -i=localhost -p=3456
+python3 -m AsyncRemoteShell.ReverseShellServer
+python3 -m AsyncRemoteShell.ReverseShellClient
+
+python3 -m AsyncRemoteShell.ReverseShellServer --interface=localhost --port=3456
 python3 -m AsyncRemoteShell.ReverseShellClient -i=localhost -p=3456
 ```
 
 ### Python executable
 
-Same commands than python module.
+Same commands than python package `python3 -m AsyncRemoteShell <MODULE> [OPTIONS]`.
 
 ```bash
 python3 AsyncRemoteShell.pyz ShellServer
 
 chmod u+x AsyncRemoteShell.pyz
-./AsyncRemoteShell.pyz ShellClient localhost 45678
+./AsyncRemoteShell.pyz ShellClient -i=localhost --port=45678
 ```
 
 ### Python3
@@ -101,6 +108,7 @@ import asyncore
 ShellClient("10.0.0.2", 45678) # host and port is required
 asyncore.loop()
 ```
+
 Server:
 ```python 
 from AsyncRemoteShell import ShellServer
@@ -110,6 +118,7 @@ asyncore.loop()
 ```
 
 ## Why Asynchronous Shell
+
 You can install this package on Windows and execute this script:
 ```python
 from time import perf_counter
@@ -118,16 +127,17 @@ t1 = perf_counter(); system('powershell -c "Get-PSDrive" & netstat & systeminfo'
 print(f"Execution time : {t2 - t1} s")
 ```
 
-Launch `ShellServer` with command line and launch `ShellClient localhost 45678` and write: `powershell -c "Get-PSDrive" & netstat & systeminfo`.
+Launch `ShellServer` with command line and launch `ShellClient -i=localhost -p=45678` and write in shell: `powershell -c "Get-PSDrive" & netstat & systeminfo`.
 
 Compare execution time.
 
-## Link
+## Links
  - [AsyncRemoteShell Github Page](https://github.com/mauricelambert/AsyncRemoteShell)
  - [ReverseShellServer Documentation](https://mauricelambert.github.io/info/python/security/AsyncRemoteShell/ReverseShellServer.html)
  - [ReverseShellClient Documentation](https://mauricelambert.github.io/info/python/security/AsyncRemoteShell/ReverseShellClient.html)
  - [ShellServer Documentation](https://mauricelambert.github.io/info/python/security/AsyncRemoteShell/ShellServer.html)
  - [ShellClient Documentation](https://mauricelambert.github.io/info/python/security/AsyncRemoteShell/ShellClient.html)
+ - [commons Documentation](https://mauricelambert.github.io/info/python/security/AsyncRemoteShell/commons.html)
  - [Download as python executable](https://mauricelambert.github.io/info/python/security/AsyncRemoteShell.pyz)
  - [Pypi package](https://pypi.org/project/AsyncRemoteShell/)
 
