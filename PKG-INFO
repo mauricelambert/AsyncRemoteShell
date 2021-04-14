@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: AsyncRemoteShell
-Version: 0.1.0
+Version: 0.1.1
 Summary: This package implement 4 asynchronous tools to execute remote commands
 Home-page: https://github.com/mauricelambert/AsyncRemoteShell
 Author: Maurice Lambert
@@ -135,10 +135,10 @@ Description: # AsyncRemoteShell
         print(f"Execution time : {t2 - t1} s")
         ```
         
-        Launch `ShellServer` with command line and launch `ShellClient -i=localhost -p=45678` and write in shell: `powershell -c "Get-PSDrive" & netstat & systeminfo`.
-
+        Launch `ShellServer` with command line and launch `ShellClient -i=localhost -p=45678` and write: `powershell -c "Get-PSDrive" & netstat & systeminfo`.
+        
         Compare execution time.
-
+        
         ## Links
          - [AsyncRemoteShell Github Page](https://github.com/mauricelambert/AsyncRemoteShell)
          - [ReverseShellServer Documentation](https://mauricelambert.github.io/info/python/security/AsyncRemoteShell/ReverseShellServer.html)

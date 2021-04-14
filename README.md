@@ -127,7 +127,7 @@ t1 = perf_counter(); system('powershell -c "Get-PSDrive" & netstat & systeminfo'
 print(f"Execution time : {t2 - t1} s")
 ```
 
-Launch `ShellServer` with command line and launch `ShellClient -i=localhost -p=45678` and write in shell: `powershell -c "Get-PSDrive" & netstat & systeminfo`.
+Launch `ShellServer` with command line and launch `ShellClient -i=localhost -p=45678` and write: `powershell -c "Get-PSDrive" & netstat & systeminfo`.
 
 Compare execution time.
 
